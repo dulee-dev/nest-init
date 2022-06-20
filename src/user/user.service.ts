@@ -53,12 +53,14 @@ export class UserService {
 
   // 아이디 중복 체크
   async idDupChck(userId: string): Promise<boolean> {
-    return !!(await this.userRepository.findOne({ userId }));
+    return !!(await this.userRepository.findOne({ where: { userId } }));
   }
 
   // 닉네임 중복 체크
   async nickNameDupChck(userNickName: string): Promise<boolean> {
-    return !!(await this.userRepository.findOne({ userNickName }));
+    return !!(await this.userRepository.findOne({
+      where: { userNickName: userNickName },
+    }));
   }
 
   // 유저 생성
@@ -130,7 +132,9 @@ export class UserService {
     const { userId, userPw, naverToken } = signInUserDto;
     if (signInUserDto.authType) {
       try {
-        const existUser = await this.userRepository.findOne(signInUserDto);
+        const existUser = await this.userRepository.findOne({
+          where: { ...signInUserDto },
+        });
         return this.authService.signIn(
           existUser.userIdx,
           existUser.userId,
@@ -194,7 +198,7 @@ export class UserService {
   }
 
   async findPw(userId: string) {
-    const user = await this.userRepository.findOne({ userId });
+    const user = await this.userRepository.findOne({ where: { userId } });
 
     if (user) {
       const { userIdx } = user;
@@ -244,8 +248,12 @@ export class UserService {
 
   // 유저 상세 정보 조회
   async getUserInfo(userIdx: number) {
-    return await this.userRepository.findOneOrFail(userIdx, {
-      select: ['userNickName', 'isNaverLinked'],
+    return await this.userRepository.findOne({
+      where: { userIdx },
+      select: {
+        userNickName: true,
+        isNaverLinked: true,
+      },
     });
   }
 
@@ -256,7 +264,7 @@ export class UserService {
 
   // 비밀번호 수정
   async modifyPw(userIdx: number, userId: string, pw: string) {
-    const user = await this.userRepository.findOne(userIdx);
+    const user = await this.userRepository.findOne({ where: { userIdx } });
 
     if (!user) {
       throw new HttpException(
@@ -287,7 +295,9 @@ export class UserService {
 
   // 기존 계정 네아로 연동 처리
   async connectNaverSignIn(userIdx: number, token: string) {
-    const { userId: email1 } = await this.userRepository.findOneOrFail(userIdx);
+    const { userId: email1 } = await this.userRepository.findOneOrFail({
+      where: { userIdx },
+    });
     const email2 = await UserService.chckNaverToken(token);
 
     if (email1 === email2) {
@@ -302,7 +312,10 @@ export class UserService {
 
   async getUserNickName(userIdx) {
     return (
-      await this.userRepository.findOne(userIdx, { select: ['userNickName'] })
+      await this.userRepository.findOne({
+        where: { userIdx },
+        select: ['userNickName'],
+      })
     ).userNickName;
   }
 
@@ -315,7 +328,9 @@ export class UserService {
           HttpStatus.BAD_REQUEST,
         );
       }
-      const user = await this.userRepository.findOne(id);
+      const user = await this.userRepository.findOne({
+        where: { userIdx: id },
+      });
       updateUserDto['userPw'] = pwEncrypt(
         updateUserDto['userPw'],
         user['userSalt'],

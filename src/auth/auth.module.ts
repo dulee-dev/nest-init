@@ -1,22 +1,17 @@
-import { JwtStrategy } from './strategies/jwt.strategy';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
-import { jwtConstants } from './constant';
-import { LocalStrategy } from './strategies/local.strategy';
+import { secret } from '../secret/jwt';
 
 @Module({
   imports: [
-    UsersModule,
-    PassportModule,
     JwtModule.register({
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60d' },
+      secret,
+      // 토큰 만료 시간 30일
+      signOptions: { expiresIn: '30d' },
     }),
   ],
-  providers: [AuthService, JwtStrategy, LocalStrategy],
+  providers: [AuthService],
   exports: [AuthService],
 })
 export class AuthModule {}

@@ -1,12 +1,9 @@
-import { UsersModule } from 'src/users/users.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { AuthModule } from './auth/auth.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import configOptions from './app-options/config-options';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UserssModule } from './userss/userss.module';
 
 @Module({
   imports: [
@@ -21,11 +18,22 @@ import { UserssModule } from './userss/userss.module';
       entities: [],
       synchronize: true,
     }),
+    MailerModule.forRoot({
+      transport: {
+        service: 'gmail',
+        host: 'smtp.google.com',
+        port: 587,
+        secure: true,
+        auth: {
+          type: 'OAuth2',
+          user: process.env.MAILER_SENDER,
+          clientId: process.env.MAILER_CLIENT_ID,
+          clientSecret: process.env.MAILER_CLIENT_SECRET,
+          refreshToken: process.env.MAILER_REFRESH_TOKEN,
+        },
+      },
+    }),
     AuthModule,
-    UsersModule,
-    UserssModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

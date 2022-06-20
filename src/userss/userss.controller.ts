@@ -1,3 +1,4 @@
+import { TokenData } from './../libs/user.decorator';
 import {
   Controller,
   Get,
@@ -15,6 +16,7 @@ import { UpdateUserssDto } from './dto/update-userss.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { LocalAuthGuard } from 'src/auth/guards/local.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { Token } from 'src/libs/user.decorator';
 
 @Controller('userss')
 export class UserssController {
@@ -31,7 +33,13 @@ export class UserssController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  findAll() {
+  findAll(@Token() user: TokenData) {
+    console.log(user);
+    return this.userssService.findAll();
+  }
+
+  @Get()
+  aaaa() {
     return this.userssService.findAll();
   }
 

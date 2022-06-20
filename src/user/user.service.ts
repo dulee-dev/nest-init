@@ -344,9 +344,7 @@ export class UserService {
 
   async findEmailTrue(userEmail: string) {
     try {
-      const existUser = await this.userRepository.findOneOrFail({
-        userId: userEmail,
-      });
+      const existUser = await this.userRepository.findOneOrFail({ where: { userId: userEmail }});
       if (existUser) {
         if (!existUser.userPw) {
           return 'social';
@@ -364,9 +362,9 @@ export class UserService {
 
   async pwCodeVali(userEmail: string) {
     try {
-      const userExist = await this.userRepository.findOne({
+      const userExist = await this.userRepository.findOne({where: {
         userId: userEmail,
-      });
+      }});
       if (!userExist)
         throw new HttpException('조회 실패', HttpStatus.BAD_REQUEST);
       const code = Math.floor(Math.random() * 899999 + 100000);
@@ -412,7 +410,7 @@ export class UserService {
   async pwCodeVerif(resetToken: string, newCode: number) {
     try {
       const findOption = { hash: resetToken, code: newCode };
-      const pwCodeExist = await this.pwCodesRepository.findOne(findOption);
+      const pwCodeExist = await this.pwCodesRepository.findOne({where: {...findOption}});
       if (!pwCodeExist)
         throw new HttpException('조회 실패', HttpStatus.BAD_REQUEST);
       return {};
@@ -422,32 +420,35 @@ export class UserService {
   }
 
   async findExistEmail(userEmail: string): Promise<number> {
-    const userEmailExist = await this.userRepository.findOne({
+    const userEmailExist = await this.userRepository.findOne({where: {
       userId: userEmail,
-    });
+    }});
     if (!userEmailExist) return -1;
     else return userEmailExist.authType;
   }
 
   // 유저 상세 정보 조회
   async findMe(userIdx: number) {
-    return await this.userRepository.findOne(
-      { userIdx },
-      { select: ['userNickName', 'ph', 'addr1', 'addr2'] },
-    );
+    return await this.userRepository.findOne({where: {userIdx},
+    select: {
+      userNickName: true,
+      ph: true,
+      addr1: true,
+      addr2: true
+    }});
   }
   // 닉네임 중복 체크
   async checkMyNickDup(
     userIdx: number,
     userNickName: string,
   ): Promise<boolean> {
-    const userExist = await this.userRepository.findOne({ userNickName });
+    const userExist = await this.userRepository.findOne({where: { userNickName }});
     if (userExist && userExist.userIdx !== userIdx) return true;
     else return false;
   }
 
   async removeMe(userIdx: number) {
-    const existUser = await this.userRepository.findOne(userIdx);
+    const existUser = await this.userRepository.findOne({where: {userIdx}});
     const removeUser = await this.userRepository.remove(existUser);
     return removeUser;
   }

@@ -9,7 +9,7 @@ import * as jwt from 'jsonwebtoken';
 import { TokenData } from 'src/libs/user.decorator';
 import { User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
-import { secret } from '../secret/jwt';
+import { jwtConstant } from '../secret/jwt';
 
 export class AuthGuard implements CanActivate {
   constructor(
@@ -41,7 +41,7 @@ export class AuthGuard implements CanActivate {
   // 토큰 검증
   validateToken(token: string): jwt.JwtPayload | string {
     try {
-      return jwt.verify(token, secret);
+      return jwt.verify(token, jwtConstant.secret);
     } catch ({ message }) {
       switch (message) {
         case 'invalid token':

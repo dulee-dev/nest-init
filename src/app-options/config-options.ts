@@ -10,8 +10,6 @@ const JoiObject = Joi.object({
   AWS_RDS_USERNAME: Joi.string().required(),
   AWS_RDS_SECRET: Joi.string().required(),
   AWS_RDS_DB_NAME: Joi.string().required(),
-  // JWT
-  JWT_SECRET: Joi.string().required(),
 });
 
 const configOptions = {
